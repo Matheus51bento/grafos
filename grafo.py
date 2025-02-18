@@ -1,3 +1,5 @@
+import pandas as pd
+
 class Grafo:
 
     def __init__(self):
@@ -10,8 +12,9 @@ class Grafo:
             self.arestas = None
 
     class Aresta:
-        def __init__(self, data):
+        def __init__(self, data, peso):
             self.data = data
+            self.peso = peso
             self.next = None
     
     def add_vertice(self, data):
@@ -24,17 +27,18 @@ class Grafo:
             vertice = self.Vertice(data)
             vertice.next = self.head
             self.head = vertice
+        
 
-    def add_aresta(self, vertice1, vertice2):
+    def add_aresta(self, vertice1, vertice2, peso):
         vertice = self.search(vertice1)
         node_vertice = self.search(vertice2)
         if vertice is None or node_vertice is None:
             return None
         
         if vertice.arestas is None:
-            vertice.arestas = self.Aresta(node_vertice)
+            vertice.arestas = self.Aresta(node_vertice, peso)
         else:
-            aresta = self.Aresta(node_vertice)
+            aresta = self.Aresta(node_vertice, peso)
             aresta.next = vertice.arestas
             vertice.arestas = aresta
 
@@ -70,8 +74,30 @@ class Grafo:
         return self.search(data, vertice.next)
         
 
+class ReadCsv:
+
+    def generate_grafo_by_csv(self):
+        grafo = Grafo()
+
+        df = pd.read_csv("csv/grafos.csv")
+
+        for index, row in df.iterrows():
+            origem = row["Origem"]
+            destino = row["Destino"]
+            peso = row["Peso"]
+            print(f"Origem: {origem}, Destino: {destino}, Peso: {peso}")
+
+            grafo.add_vertice(origem)
+            grafo.add_vertice(destino)
+            grafo.add_aresta(origem,destino, peso)
+
+        return grafo
+
+
 if __name__ == "__main__":
-    grafo = Grafo()
+
+    readCsv = ReadCsv()
+    grafo = readCsv.generate_grafo_by_csv()
     
     try:
         while True:
