@@ -1,3 +1,6 @@
+import networkx as nx
+import matplotlib.pyplot as plt
+
 import pandas as pd
 
 
@@ -108,8 +111,64 @@ class Grafo:
             return vertice
         if vertice.next is None:
                 return None
-        return self.search(data, vertice.next)
+        return self.search(data, vertice.next)    
+
+    def to_networkx(self):
+        G = nx.DiGraph()
+        vertice = self.head
+        while vertice is not None:
+            G.add_node(vertice.data)
+            aresta = vertice.arestas
+            while aresta is not None:
+                G.add_edge(vertice.data, aresta.data.data, weight=aresta.peso)
+                aresta = aresta.next
+            vertice = vertice.next
+        return G
+
+    def draw(self, layout="circular"):
+        G = self.to_networkx()
+
+        if layout == "shell":
+            pos = nx.shell_layout(G)
+        elif layout == "circular":
+            pos = nx.circular_layout(G)
+        elif layout == "kamada_kawai":
+            pos = nx.kamada_kawai_layout(G)
+        else:
+            pos = nx.spring_layout(G, seed=42, k=0.7)
+
+        plt.figure(figsize=(8, 6))
         
+        nx.draw(G, pos, with_labels=True, node_color="lightblue", node_size=2000, 
+                edge_color="gray", width=2, font_size=12, font_weight="bold",
+                arrows=True, arrowstyle="-|>", arrowsize=20)
+        
+        edge_labels = nx.get_edge_attributes(G, 'weight')
+        nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_size=12, font_color="red")
+
+        plt.show()
+
+class DFS:
+    def __init__(self):
+        self.visitados = []
+        self.custo_maximo = 0
+        self.caminho_maximo = []
+
+    def dfs_menor_custo(self, grafo, origem, destino, custo_atual, caminho_atual):
+        self.visitados.append(origem)
+        if origem == destino:
+            if custo_atual > self.custo_maximo:
+                self.custo_maximo = custo_atual
+                self.caminho_maximo = caminho_atual
+        
+        aresta = origem.arestas
+        while aresta is not None:
+            if aresta.data not in self.visitados:
+                self.dfs_menor_custo(grafo, aresta.data, destino, custo_atual + aresta.peso, caminho_atual + [aresta.data])
+            aresta = aresta.next
+
+        self.visitados.remove(origem)
+
 
 class ReadCsv:
 
@@ -161,6 +220,14 @@ if __name__ == "__main__":
                 node2 = input("Digite o vertice de destino: ")
                 bfs = BFS(grafo)
                 print(bfs.menor_saltos(node1,node2))
+            elif op == 5:
+                origem = input("Digite o vertice de origem: ")
+                destino = input("Digite o vertice de destino: ")
+                dfs = DFS()
+                dfs.dfs_menor_custo(grafo, grafo.search(origem), grafo.search(destino), 0, [grafo.search(origem)])
+                print(f"Custo máximo: {dfs.custo_maximo}")
+                print(f"Caminho máximo: {[vertice.data for vertice in dfs.caminho_maximo]}")
+                
             elif op == 6:
                 break
             else:
