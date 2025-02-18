@@ -1,3 +1,6 @@
+import networkx as nx
+import matplotlib.pyplot as plt
+
 class Grafo:
 
     def __init__(self):
@@ -68,7 +71,33 @@ class Grafo:
         if vertice.next is None:
                 return None
         return self.search(data, vertice.next)
-        
+    
+    def to_networkx(self):
+        G = nx.DiGraph(directed=True)
+        vertice = self.head
+        while vertice is not None:
+            G.add_node(vertice.data)
+            aresta = vertice.arestas
+            while aresta is not None:
+                G.add_edge(vertice.data, aresta.data.data)
+                aresta = aresta.next
+            vertice = vertice.next
+        return G
+
+    def draw(self):
+        G = self.to_networkx()
+        pos = nx.spring_layout(G)
+
+        plt.figure(figsize=(8, 6))
+        options = {
+            'node_color': 'lightblue',
+            'node_size': 2000,
+            'width': 3,
+            'arrowstyle': '-|>',
+            'arrowsize': 20,
+        }
+        nx.draw_networkx(G, arrows=True, **options)
+        plt.show()
 
 if __name__ == "__main__":
     grafo = Grafo()
@@ -90,6 +119,7 @@ if __name__ == "__main__":
             elif op == 3:
                 print("\nGrafo:")
                 grafo.print()
+                grafo.draw()
                 print()
             elif op == 4:
                 break
