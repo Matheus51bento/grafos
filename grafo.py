@@ -1,5 +1,42 @@
 import pandas as pd
 
+
+class BFS:
+    def __init__(self, grafo):
+        self.grafo = grafo
+        self.fila = []
+        self.visitados = set([])
+
+    def insert_vizinhos_list(self, aresta, saltos):
+        if aresta is None:
+            return
+        self.fila.append((aresta.data, saltos + 1))
+        self.visitados.add(aresta.data)
+        return self.insert_vizinhos_list(aresta.next, saltos)
+    
+    def menor_saltos(self, origem, destino):
+        exist_origem =  self.grafo.search(origem)
+        exist_destino =  self.grafo.search(destino)
+
+        if not exist_origem and  not exist_destino:
+            return "Origem ou destino não existe \n\n"
+        
+        self.fila.append((exist_origem,0))
+        self.visitados.add(exist_origem)
+
+        while len(self.fila) > 0:
+            vertice_atual, saltos = self.fila.pop(0)
+
+            if vertice_atual == exist_destino:
+                return f"Número de saltos: {saltos}\n\n"
+            
+            self.insert_vizinhos_list(vertice_atual.arestas, saltos)
+
+        return "Nenhum caminho encontrado \n\n"
+
+
+    
+
 class Grafo:
 
     def __init__(self):
@@ -98,13 +135,15 @@ if __name__ == "__main__":
 
     readCsv = ReadCsv()
     grafo = readCsv.generate_grafo_by_csv()
-    
+
     try:
         while True:
             print("1 - Adicionar vertice")
             print("2 - Adicionar aresta")
             print("3 - Imprimir")
-            print("4 - Sair")
+            print("4 - BFS")
+            print("5 - DFS")
+            print("6 - Sair")
             op = int(input("Escolha uma opção: "))
             if op == 1:
                 data = input("Digite o dado do vertice: ")
@@ -118,6 +157,11 @@ if __name__ == "__main__":
                 grafo.print()
                 print()
             elif op == 4:
+                node1 = input("Digite o vertice de origem: ")
+                node2 = input("Digite o vertice de destino: ")
+                bfs = BFS(grafo)
+                print(bfs.menor_saltos(node1,node2))
+            elif op == 6:
                 break
             else:
                 print("Opção inválida")
