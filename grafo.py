@@ -308,17 +308,13 @@ class Dijkstra:
         distancias[origem] = 0
 
         caminho_anterior = {}
-
         nao_visitados = [vertice.data for vertice in self.grafo.get_vertices()]
 
-
         while nao_visitados:
-            nao_visitados.sort(key=lambda x: distancias[x])
-
             vertice_atual = nao_visitados.pop(0)
             vertice_atual_obj = self.grafo.search(vertice_atual)
             aresta = vertice_atual_obj.arestas
-
+  
             while aresta:
                 vizinho = aresta.data.data
                 peso = aresta.peso
