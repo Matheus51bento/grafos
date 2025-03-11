@@ -1,6 +1,5 @@
 import networkx as nx
 import matplotlib.pyplot as plt
-import sys
 import time
 from itertools import permutations
 import pandas as pd
@@ -89,7 +88,7 @@ class Grafo:
         if vertice.next is None:
             return None
         return self.search(data, vertice.next)
-    
+
     def contar_vertices(self):
         count = 0
         vertice = self.head
@@ -105,7 +104,7 @@ class Grafo:
                 return aresta.peso
             aresta = aresta.next
         return None
-    
+
     def print(self, vertice: Vertice = None):
         if vertice is None:
             if self.head is None:
@@ -225,6 +224,7 @@ class TSP:
         else:
             return None, None
 
+
 class TSPBruteForce:
     def __init__(self, grafo):
         self.grafo = grafo
@@ -250,8 +250,8 @@ class TSPBruteForce:
     def encontrar_melhor_rota(self, inicio):
         vertices = [vertice.data for vertice in self.grafo.get_vertices()]
         if inicio not in vertices:
-            return None, None  
-        
+            return None, None
+
         vertices.remove(inicio)
 
         melhor_custo = float("inf")
@@ -265,6 +265,7 @@ class TSPBruteForce:
                 melhor_rota = rota
 
         return melhor_custo, melhor_rota
+
 
 class DFS:
     def __init__(self):
@@ -293,6 +294,50 @@ class DFS:
 
         self.visitados.remove(origem)
 
+class Dijkstra:
+    def __init__(self, grafo):
+        self.grafo = grafo
+
+    def encontrar_caminho_mais_curto(self, origem, destino):
+        origem_vertice = self.grafo.search(origem)
+        destino_vertice = self.grafo.search(destino)
+        if not origem_vertice or not destino_vertice:
+            return "Origem ou destino não existe \n\n"
+
+        distancias = {vertice.data: float('inf') for vertice in self.grafo.get_vertices()}
+        distancias[origem] = 0
+
+        caminho_anterior = {}
+
+        nao_visitados = [vertice.data for vertice in self.grafo.get_vertices()]
+
+
+        while nao_visitados:
+            nao_visitados.sort(key=lambda x: distancias[x])
+
+            vertice_atual = nao_visitados.pop(0)
+            vertice_atual_obj = self.grafo.search(vertice_atual)
+            aresta = vertice_atual_obj.arestas
+
+            while aresta:
+                vizinho = aresta.data.data
+                peso = aresta.peso
+                nova_distancia = distancias[vertice_atual] + peso
+                if nova_distancia < distancias[vizinho]:
+                    distancias[vizinho] = nova_distancia
+                    caminho_anterior[vizinho] = vertice_atual
+
+                aresta = aresta.next
+
+        caminho = []
+        vertice_atual = destino
+        while vertice_atual in caminho_anterior:
+            caminho.insert(0, vertice_atual)
+            vertice_atual = caminho_anterior[vertice_atual]
+        caminho.insert(0, origem)
+
+        return f"Distância: {distancias[destino]}, Caminho: {caminho}\n\n"
+
 
 class ReadCsv:
     def generate_grafo_by_csv(self):
@@ -304,7 +349,7 @@ class ReadCsv:
             grafo.add_vertice(row["Destino"])
             grafo.add_aresta(row["Origem"], row["Destino"], row["Peso"])
 
-            grafo.add_aresta(row["Destino"], row["Origem"], row["Peso"])
+            # grafo.add_aresta(row["Destino"], row["Origem"], row["Peso"])
 
         return grafo
 
@@ -322,7 +367,8 @@ if __name__ == "__main__":
             print("4 - BFS")
             print("5 - DFS")
             print("6 - Caixeiro viajante")
-            print("7 - Sair")
+            print("7 - Dijkstra")
+            print("8 - Sair")
             op = int(input("Escolha uma opção: "))
             if op == 1:
                 data = input("Digite o dado do vertice: ")
@@ -379,6 +425,12 @@ if __name__ == "__main__":
 
                 # grafo.draw()
             elif op == 7:
+                origem = input("Digite o vertice de origem: ")
+                destino = input("Digite o vertice de destino: ")
+                dijkstra = Dijkstra(grafo)
+                print(dijkstra.encontrar_caminho_mais_curto(origem, destino))
+
+            elif op == 8:
                 break
 
             else:
